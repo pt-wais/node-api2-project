@@ -80,6 +80,19 @@ blogPost.delete('/posts/:id', (req, res)=> {
   })
 })
 
+blogPost.put('/posts/:id', (req, res)=> {
+ const {id} = req.params
+ const updated = req.body
+
+ data.update(id, updated)
+  .then( update => {
+   
+   res.status(200).json(update)
+
+  }).catch(error => {
+   res.status(500).json(error)
+  })
+})
 
 
 module.exports = blogPost;
