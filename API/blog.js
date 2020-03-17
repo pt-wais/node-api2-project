@@ -1,98 +1,104 @@
+/* eslint-disable linebreak-style */
+/* eslint-disable no-console */
+/* eslint-disable linebreak-style */
 const express = require('express');
 const data = require('../data/db.js');
+
 const blogPost = express.Router();
 
-blogPost.get('/', (req, res) => {
- res.send(
-  `
-  <h1>Lambda Hubs API</h1>
-  <p> Welcome</p>
-  `
- )
-})
 
-blogPost.post('/posts', (req, res)=> {
-const obj = req.body
-data.insert(obj)
- .then(post => {
-   res.status(200).json(post)
-  })
-  .catch(error => {
-   res.status(500).json({
-    errorMessage: 'sorry, we ran into an error'
-   })
-  })
-})
+blogPost.post('/posts', (req, res) => {
+  const obj = req.body;
+  data.insert(obj)
+    .then((post) => {
+      // eslint-disable-next-line no-unused-expressions
+      obj.title && obj.contents ? res.status(201).json(post) : res.status(400).json({ errorMessage: 'Please provide title and contents for the post.' });
+      console.log(obj.title);
+    })
+    .catch(() => {
+      res.status(500).json({
+        error: 'There was an error while saving the post to the database',
+      });
+    });
+});
 
-blogPost.post('/posts/:id/comments', (req, res)=>{
- const obj = req.body
-
- data.insertComment(obj)
-  .then(comment => {
-   res.status(200).json(comment)
-  })
-  .catch(error => {
-   res.status(500).json({
-    errorMessage: 'more problems'
-   })
-  })
-})
+blogPost.post('/posts/:id/comments', (req, res) => {
+  const obj = req.body;
+  const { id } = req.params;
 
 
-blogPost.get('/posts', (req, res)=> {
- data.find()
-  .then(posts =>{
-   res.status(200).json(posts)
-  })
-   .catch(error => {
+  data.insertComment(obj)
 
-    res.status(500).json({message: 'dead'})
-   })
-})
+    .then((comment) => {
+      data.findById(id).then((post) => {
+        // eslint-disable-next-line no-unused-expressions
 
-blogPost.get('/posts/:id', (req, res)=> {
- const {id} = req.params
- data.findById(id)
-  .then(findPost => {
-  
-   res.status(200).json(findPost)
-  }).catch(error => {
+        if (obj.text && post[0]) {
+          res.status(200).json([post, comment]);
+        } else if (!obj.text) {
+          res.status(400).json({ errorMessage: 'Please provide text for the comment.' });
+        } else {
+          res.status(404).json({ message: 'The post with the specified ID does not exist.' });
+        }
+      });
+    })
+    .catch(() => {
+      res.status(500).json({
+        error: 'There was an error while saving the comment to the database',
+      });
+    });
+});
 
-   res.status(500).json({message: 'not working yet'})
-  })
-})
 
-blogPost.get('/posts/:id/comments', (req, res)=> {
- const {id} = req.params
- data.findCommentById(id)
-  .then(findComment => {
-   res.status(200).json(findComment)
-  }).catch(error => {res.status(500).json({message: 'not working'})})
-})
+blogPost.get('/posts', (req, res) => {
+  data.find()
+    .then((posts) => {
+      res.status(200).json(posts);
+    })
+    .catch(() => {
+      res.status(500).json({ message: 'dead' });
+    });
+});
 
-blogPost.delete('/posts/:id', (req, res)=> {
- const {id} = req.params
- data.remove(id)
-  .then(del => {
-   res.status(200).json(del)
-  }).catch(error => {
-   res.status(500).json(error)
-  })
-})
+blogPost.get('/posts/:id', (req, res) => {
+  const { id } = req.params;
+  data.findById(id)
+    .then((findPost) => {
+      res.status(200).json(findPost);
+    }).catch(() => {
+      res.status(500).json({ message: 'not working yet' });
+    });
+});
 
-blogPost.put('/posts/:id', (req, res)=> {
- const {id} = req.params
- const updated = req.body
+blogPost.get('/posts/:id/comments', (req, res) => {
+  const { id } = req.params;
+  data.findCommentById(id)
+    .then((findComment) => {
+      res.status(200).json(findComment);
+    }).catch(() => { res.status(500).json({ message: 'not working' }); });
+});
 
- data.update(id, updated)
-  .then( update => {
-   
-   res.status(200).json(update)
+blogPost.delete('/posts/:id', (req, res) => {
+  const { id } = req.params;
+  data.remove(id)
+    .then((del) => {
+      res.status(200).json(del);
+    }).catch((error) => {
+      res.status(500).json(error);
+    });
+});
 
-  }).catch(error => {
-   res.status(500).json(error)
-  })
-})
+blogPost.put('/posts/:id', (req, res) => {
+  const { id } = req.params;
+  const updated = req.body;
+
+  data.update(id, updated)
+    .then((update) => {
+      res.status(200).json(update);
+    }).catch((error) => {
+      res.status(500).json(error);
+    });
+});
 
 
 module.exports = blogPost;
