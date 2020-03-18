@@ -99,7 +99,13 @@ blogPost.put('/posts/:id', (req, res) => {
   data.update(id, updated)
     .then((update) => {
       // eslint-disable-next-line no-unused-expressions
-      update ? res.status(200).json(update) : res.status(400).json({ message: 'The post with the specified ID does not exist.' });
+      if (updated.title && update) {
+        res.status(200).json(update);
+      } else if (!updated.title && update) {
+        res.status(400).json({ errorMessage: 'Please provide title and contents for the post.' });
+      } else {
+        res.status(404).json({ message: 'The post with the specified ID does not exist.' });
+      }
     }).catch((error) => {
       res.status(500).json(error);
     });
