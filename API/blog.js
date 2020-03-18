@@ -68,7 +68,7 @@ blogPost.get('/posts/:id', (req, res) => {
       // eslint-disable-next-line no-unused-expressions
       findPost[0] ? res.status(200).json(findPost) : res.status(404).json({ message: 'The post with the specified ID does not exist.' });
     }).catch(() => {
-      res.status(500).json({ message: 'not working yet' });
+      res.status(500).json({ error: 'The post information could not be retrieved.' });
     });
 });
 
@@ -76,15 +76,17 @@ blogPost.get('/posts/:id/comments', (req, res) => {
   const { id } = req.params;
   data.findCommentById(id)
     .then((findComment) => {
-      res.status(200).json(findComment);
-    }).catch(() => { res.status(500).json({ message: 'not working' }); });
+      // eslint-disable-next-line no-unused-expressions
+      findComment[0] ? res.status(200).json(findComment) : res.status(404).json({ message: 'The post with the specified ID does not exist.' });
+    }).catch(() => { res.status(500).json({ error: 'The comments information could not be retrieved.' }); });
 });
 
 blogPost.delete('/posts/:id', (req, res) => {
   const { id } = req.params;
   data.remove(id)
     .then((del) => {
-      res.status(200).json(del);
+      // eslint-disable-next-line no-unused-expressions
+      del ? res.status(200).json(del) : res.status(404).json({ message: 'The post with the specified ID does not exist.' });
     }).catch((error) => {
       res.status(500).json(error);
     });
