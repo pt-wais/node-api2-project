@@ -98,7 +98,8 @@ blogPost.put('/posts/:id', (req, res) => {
 
   data.update(id, updated)
     .then((update) => {
-      res.status(200).json(update);
+      // eslint-disable-next-line no-unused-expressions
+      update ? res.status(200).json(update) : res.status(400).json({ message: 'The post with the specified ID does not exist.' });
     }).catch((error) => {
       res.status(500).json(error);
     });
