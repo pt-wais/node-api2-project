@@ -56,15 +56,17 @@ blogPost.get('/posts', (req, res) => {
       res.status(200).json(posts);
     })
     .catch(() => {
-      res.status(500).json({ message: 'dead' });
+      res.status(500).json({ error: 'The posts information could not be retrieved.' });
     });
 });
 
 blogPost.get('/posts/:id', (req, res) => {
   const { id } = req.params;
+
   data.findById(id)
     .then((findPost) => {
-      res.status(200).json(findPost);
+      // eslint-disable-next-line no-unused-expressions
+      findPost[0] ? res.status(200).json(findPost) : res.status(404).json({ message: 'The post with the specified ID does not exist.' });
     }).catch(() => {
       res.status(500).json({ message: 'not working yet' });
     });
