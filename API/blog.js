@@ -22,19 +22,20 @@ blogPost.post('/posts', (req, res) => {
     });
 });
 
-blogPost.post('/posts/:id/comments', (req, res) => {
+blogPost.post('/:postid/comments/:id', (req, res) => {
   const obj = req.body;
+  const { postid } = req.params;
   const { id } = req.params;
+  console.log(obj);
 
-
+  console.log(postid, id);
   data.insertComment(obj)
 
     .then((comment) => {
-      data.findById(id).then((post) => {
+      data.findById(postid).then((post) => {
         // eslint-disable-next-line no-unused-expressions
-
         if (obj.text && post[0]) {
-          res.status(200).json([post, comment]);
+          res.status(200).json(post);
         } else if (!obj.text) {
           res.status(400).json({ errorMessage: 'Please provide text for the comment.' });
         } else {
@@ -42,9 +43,9 @@ blogPost.post('/posts/:id/comments', (req, res) => {
         }
       });
     })
-    .catch(() => {
+    .catch((errormsg) => {
       res.status(500).json({
-        error: 'There was an error while saving the comment to the database',
+        error: 'There was an error while saving the comment to the database', errormsg,
       });
     });
 });
@@ -71,15 +72,37 @@ blogPost.get('/posts/:id', (req, res) => {
       res.status(500).json({ error: 'The post information could not be retrieved.' });
     });
 });
-
-blogPost.get('/posts/:id/comments', (req, res) => {
+blogPost.get('/posts/:id/comments/:cmntId', (req, res) => {
   const { id } = req.params;
-  data.findCommentById(id)
-    .then((findComment) => {
+  const { cmntId } = req.params;
+
+  data.findPostComments(id)
+    .then((findPost) => {
       // eslint-disable-next-line no-unused-expressions
-      findComment[0] ? res.status(200).json(findComment) : res.status(404).json({ message: 'The post with the specified ID does not exist.' });
-    }).catch(() => { res.status(500).json({ error: 'The comments information could not be retrieved.' }); });
+      // findPost[0] ? res.status(200).json(findPost) : res.status(404).json({ message: 'The post with the specified ID does not exist.' });
+      if (findPost) {
+        data.findCommentById(cmntId)
+          .then((comment) => {
+            console.log(comment);
+            res.status(200).json(comment);
+          }).catch((err) => {
+            res.status(500).json(err);
+          });
+      }
+    }).catch(() => {
+      res.status(500).json({ error: 'The post information could not be retrieved.' });
+    });
 });
+
+// blogPost.get('/posts/:id/comments/', (req, res) => {
+//   const { id } = req.params;
+//   console.log('no')
+//   data.findCommentById(id)
+//     .then((findComment) => {
+//       // eslint-disable-next-line no-unused-expressions
+//       findComment[0] ? res.status(200).json(findComment) : res.status(404).json({ message: 'The post with the specified ID does not exist.' });
+//     }).catch(() => { res.status(500).json({ error: 'The comments information could not be retrieved.' }); });
+// });
 
 blogPost.delete('/posts/:id', (req, res) => {
   const { id } = req.params;
